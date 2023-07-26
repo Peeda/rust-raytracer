@@ -1,4 +1,6 @@
+use crate::utils;
 use std::ops;
+use rand::Rng;
 #[derive(Copy, Clone)]
 pub struct Vec3 {
     pub x:f64,
@@ -39,6 +41,29 @@ impl Vec3 {
             x: a.y*b.z - a.z*b.y,
             y: a.z*b.x - a.x*b.z,
             z: a.x*b.y - a.y*b.x,
+        }
+    }
+    pub fn rand() -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3 {
+            x:rng.gen::<f64>(),
+            y:rng.gen::<f64>(),
+            z:rng.gen::<f64>(),
+        }
+    }
+    pub fn rand_range(min:f64, max:f64) -> Vec3 {
+        Vec3 {
+            x:utils::rand_float(min,max),
+            y:utils::rand_float(min,max),
+            z:utils::rand_float(min,max),
+        }
+    }
+    pub fn rand_in_unit_sphere() -> Vec3 {
+        loop {
+            let rand_vec = Vec3::rand_range(-1.0,1.0);
+            if rand_vec.magnitude_squared() < 1.0 {
+                return rand_vec;
+            }
         }
     }
 }
@@ -89,6 +114,46 @@ impl ops::Div<f64> for Vec3 {
             x: self.x / scale,
             y: self.y / scale,
             z: self.z / scale,
+        }
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn float_equal(a:f64,b:f64) -> bool {
+        if (a-b).abs() < 1e-9 {
+            return true;
+        }
+        false
+    }
+    fn unique(a:Vec3) -> bool {
+        if float_equal(a.x,a.y) || float_equal(a.y,a.z) || float_equal(a.x,a.z) {
+            return false;
+        }
+        true
+    }
+    #[test]
+    fn rand_vector_unique_test() {
+        for _ in 0..1000 {
+            let rand_vec = Vec3::rand_range(0.0,10.0);
+            assert!(unique(rand_vec));
+        }
+    }
+    #[test]
+    fn rand_vector_range_test() {
+        let mut rng = rand::thread_rng();
+        for _ in 0..1000 {
+            let a = rng.gen_range(0..100) as f64;
+            let b = rng.gen_range(100..200) as f64;
+            let v = Vec3::rand_range(a,b);
+            assert!(v.x>a && v.y>a && v.z>a && v.x<b && v.y<b && v.z<b);
+        }
+    }
+    #[test]
+    fn rand_vector_unit_sphere_test() {
+        for _ in 0..1000 {
+            let v = Vec3::rand_in_unit_sphere();
+            assert!((v.x*v.x + v.y*v.y + v.z*v.z) < 1.0);
         }
     }
 }

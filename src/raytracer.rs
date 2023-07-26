@@ -9,12 +9,15 @@ use std::io::{self, Write};
 use rand::Rng;
 
 
-fn ray_color(r: Ray, world:&HittableList) -> Vec3 {
+fn ray_color(r: Ray, world:&HittableList, depth:i32) -> Vec3 {
+    if depth <= 0 {
+        return Vec3::new(0.0,0.0,0.0);
+    }
     let hit_data = world.hit(r,0.0,100000.0);
     if let Some(hit) = hit_data {
-        let mut corrected_normal = hit.normal;
-        corrected_normal.z = -corrected_normal.z;
-        return (corrected_normal + Vec3::new(1.0,1.0,1.0)) * 0.5;
+        let target = hit.point + hit.normal + Vec3::rand_in_unit_sphere();
+        let reflected = Ray::new(hit.point,target - hit.point);
+        return (ray_color(reflected,world, depth-1)) * 0.5;
     }
     let normalized_dir: Vec3 = Vec3::unit_vector(r.dir);
     let t = 0.5 * (normalized_dir.y + 1.0);
@@ -30,6 +33,7 @@ pub fn run() {
     world.push_sphere(Sphere::new(Vec3::new(0.0,-100.5,1.0),100.0));
 
     let samples = 100;
+    let depth = 50;
     let mut rng = rand::thread_rng();
 
     println!("P3\n{} {}\n255\n", WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -52,7 +56,7 @@ pub fn run() {
                 let u = (i as f64 + rand_num)/(WINDOW_WIDTH-1) as f64;
                 let v = (j as f64 + rand_num_2)/(WINDOW_HEIGHT-1) as f64;
                 let r = cam.get_ray(u,v);
-                color = color + ray_color(r,&world);
+                color = color + ray_color(r,&world,depth);
             }
             color::write_color(color,samples);
         }

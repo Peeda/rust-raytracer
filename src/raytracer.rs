@@ -48,8 +48,9 @@ pub fn run() {
             let mut color = Vec3::new(0.0,0.0,0.0);
             for _ in 0..samples {
                 let rand_num:f64 = rng.gen::<f64>();
+                let rand_num_2:f64 = rng.gen::<f64>();
                 let u = (i as f64 + rand_num)/(WINDOW_WIDTH-1) as f64;
-                let v = (j as f64 + rand_num)/(WINDOW_HEIGHT-1) as f64;
+                let v = (j as f64 + rand_num_2)/(WINDOW_HEIGHT-1) as f64;
                 let r = cam.get_ray(u,v);
                 color = color + ray_color(r,&world);
             }

@@ -4,3 +4,5 @@ pub mod rays;
 pub mod color;
 pub mod sphere;
 pub mod hit;
+pub mod utils;
+pub mod camera;

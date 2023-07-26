@@ -1,9 +1,12 @@
 use crate::color;
+use crate::camera::Camera;
 use crate::vectors::Vec3;
 use crate::rays::Ray;
 use crate::sphere::Sphere;
 use crate::hit::{HittableList,Hittable};
+
 use std::io::{self, Write};
+use rand::Rng;
 
 
 fn ray_color(r: Ray, world:&HittableList) -> Vec3 {
@@ -18,41 +21,39 @@ fn ray_color(r: Ray, world:&HittableList) -> Vec3 {
     Vec3::new(1.0,1.0,1.0) * (1.0 - t) + Vec3::new(0.5,0.7,1.0) * t
 }
 pub fn run() {
-    const ASPECT_RATIO:f64 = 16_f64/9_f64;
+    const WINDOW_ASPECT_RATIO:f64 = 16.0/9.0;
     const WINDOW_WIDTH:u16 = 400;
-    const WINDOW_HEIGHT:u16 = (WINDOW_WIDTH as f64/ASPECT_RATIO) as u16;
-
-    let viewport_height:f64 = 2_f64;
-    let viewport_width:f64 = viewport_height * ASPECT_RATIO;
-    let focal_length:f64  = 1.0;
-
-    let origin = Vec3::new(0.0,0.0,0.0);
-    let horizontal = Vec3::new(viewport_width,0.0,0.0);
-    let vertical = Vec3::new(0.0,viewport_height,0.0);
-    let bottom_left = Vec3 {
-        x: -viewport_width/2.0,
-        y: -viewport_height/2.0,
-        z: focal_length,
-    };
-
+    const WINDOW_HEIGHT:u16 = (WINDOW_WIDTH as f64/WINDOW_ASPECT_RATIO) as u16;
+    let cam = Camera::new();
     let mut world = HittableList::new();
     world.push_sphere(Sphere::new(Vec3::new(0.0,0.0,1.0),0.5));
     world.push_sphere(Sphere::new(Vec3::new(0.0,-100.5,1.0),100.0));
 
+    let samples = 100;
+    let mut rng = rand::thread_rng();
+
     println!("P3\n{} {}\n255\n", WINDOW_WIDTH, WINDOW_HEIGHT);
     for j in (0..WINDOW_HEIGHT).rev() {
-
-        eprint!("\rLines Remaining: {}", j);
+        if j < 10 {
+            eprint!("\rLines Remaining:   {}", j);
+        } else if j < 100 {
+            eprint!("\rLines Remaining:  {}", j);
+        } else {
+            eprint!("\rLines Remaining: {}", j);
+        }
         let mut stderr = io::stderr();
         let _ = stderr.flush();
 
         for i in 0..WINDOW_WIDTH {
-            let u = i as f64/(WINDOW_WIDTH-1) as f64;
-            let v = j as f64/(WINDOW_HEIGHT-1) as f64;
-
-            let r = Ray::new(origin,bottom_left + horizontal*u + vertical*v - origin);
-
-            color::write_color(ray_color(r,&world));
+            let mut color = Vec3::new(0.0,0.0,0.0);
+            for _ in 0..samples {
+                let rand_num:f64 = rng.gen::<f64>();
+                let u = (i as f64 + rand_num)/(WINDOW_WIDTH-1) as f64;
+                let v = (j as f64 + rand_num)/(WINDOW_HEIGHT-1) as f64;
+                let r = cam.get_ray(u,v);
+                color = color + ray_color(r,&world);
+            }
+            color::write_color(color,samples);
         }
     }
     eprintln!("\nDone!");

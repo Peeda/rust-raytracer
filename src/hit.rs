@@ -11,11 +11,11 @@ pub struct HitData {
 pub trait Hittable {
     fn hit(&self,r:Ray,t_min:f64,t_max:f64) -> Option<HitData>;
 }
-pub enum Hittables {
+enum Hittables {
     Sphere(Sphere),
 }
 pub struct HittableList {
-    pub list:Vec<Hittables>
+    list:Vec<Hittables>
 }
 impl HittableList {
     pub fn new() -> HittableList {

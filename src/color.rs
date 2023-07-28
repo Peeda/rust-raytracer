@@ -5,6 +5,7 @@ pub fn write_color(color:Vec3, samples:i32) {
     let (mut r,mut g,mut b) = (color.x,color.y,color.z);
     let scale:f64 = 1f64/samples as f64;
     (r,g,b) = (r*scale,g*scale,b*scale);
+    (r,g,b) = (r.sqrt(),g.sqrt(),b.sqrt());
     r = utils::clamp(r,0.0,0.9999);
     g = utils::clamp(g,0.0,0.9999);
     b = utils::clamp(b,0.0,0.9999);

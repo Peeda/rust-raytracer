@@ -1,7 +1,7 @@
 use crate::utils;
 use std::ops;
 use rand::Rng;
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone,Debug)]
 pub struct Vec3 {
     pub x:f64,
     pub y:f64,
@@ -104,6 +104,16 @@ impl ops::Mul<f64> for Vec3 {
             x: self.x * scale,
             y: self.y * scale,
             z: self.z * scale,
+        }
+    }
+}
+impl ops::Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, scale_vec:Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x * scale_vec.x,
+            y: self.y * scale_vec.y,
+            z: self.z * scale_vec.z,
         }
     }
 }

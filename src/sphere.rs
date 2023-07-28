@@ -1,15 +1,18 @@
 use crate::vectors::Vec3;
 use crate::rays::Ray;
 use crate::hit::{Hittable,HitData};
+use crate::materials::Material;
 pub struct Sphere {
     pub center:Vec3,
     pub radius:f64,
+    pub material:Material
 }
 impl Sphere {
-    pub fn new(center:Vec3, radius:f64) -> Sphere {
+    pub fn new(center:Vec3, radius:f64, material:Material) -> Sphere {
         Sphere {
             center,
-            radius
+            radius,
+            material
         }
     }
 }
@@ -42,7 +45,8 @@ impl Hittable for Sphere {
                 point:r.at(t),
                 normal,
                 t,
-                hit_front
+                hit_front,
+                mat_ref:&self.material,
             };
             return Some(out);
         }

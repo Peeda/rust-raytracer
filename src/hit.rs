@@ -1,12 +1,14 @@
 use crate::sphere::Sphere;
 use crate::rays::Ray;
 use crate::vectors::Vec3;
+use crate::materials::Material;
 #[derive(Copy, Clone)]
-pub struct HitData {
+pub struct HitData<'a> {
     pub point:Vec3,
     pub normal:Vec3,
     pub t:f64,
-    pub hit_front:bool
+    pub hit_front:bool,
+    pub mat_ref:&'a Material
 }
 pub trait Hittable {
     fn hit(&self,r:Ray,t_min:f64,t_max:f64) -> Option<HitData>;

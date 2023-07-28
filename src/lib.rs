@@ -6,3 +6,4 @@ pub mod sphere;
 pub mod hit;
 pub mod utils;
 pub mod camera;
+pub mod materials;

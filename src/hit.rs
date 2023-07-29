@@ -37,9 +37,7 @@ impl Hittable for HittableList {
                 Hittables::Sphere(sphere) => {
                     let curr_hit = sphere.hit(r,t_min,t_max);
                     if let Some(hit) = curr_hit {
-                        if closest_hit.is_none() {
-                            closest_hit = curr_hit;
-                        } else if hit.t < closest_hit.unwrap().t {
+                        if closest_hit.is_none() || hit.t < closest_hit.unwrap().t {
                             closest_hit = curr_hit;
                         }
                     }

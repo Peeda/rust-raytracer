@@ -25,7 +25,7 @@ impl Hittable for Sphere {
         let c = ac_diff.magnitude_squared() - self.radius * self.radius;
         let discriminant = half_b*half_b - a*c;
         if discriminant < 0.0 {
-            return None;
+            None
         } else {
             let mut t = (-half_b - discriminant.sqrt())/a;
             if !(t > t_min && t < t_max) {
@@ -48,7 +48,7 @@ impl Hittable for Sphere {
                 hit_front,
                 mat_ref:&self.material,
             };
-            return Some(out);
+            Some(out)
         }
     }
 }

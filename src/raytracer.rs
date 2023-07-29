@@ -42,7 +42,7 @@ pub fn run() {
     world.push_sphere(Sphere::new(Vec3::new(-1.0,0.0,1.0),0.5,material_left));
     world.push_sphere(Sphere::new(Vec3::new(1.0,0.0,1.0),0.5,material_right));
 
-    let samples = 1000;
+    let samples = 150;
     let depth = 50;
     let mut rng = rand::thread_rng();
 

@@ -7,12 +7,14 @@ pub trait Scatterable {
 pub enum Material {
     Lambertian(Lambertian),
     Metal(Metal),
+    Dielectric(Dielectric),
 }
 impl Material {
     pub fn scatter(&self, r:Ray,hit:HitData) -> Option<(Ray,Vec3)>{
         match self {
             Material::Lambertian(l) => l.scatter(r,hit),
-            Material::Metal(m) => m.scatter(r,hit)
+            Material::Metal(m) => m.scatter(r,hit),
+            Material::Dielectric(d) => d.scatter(r,hit),
         }
     }
     pub fn new_lambertian(albedo:Vec3) -> Material {
@@ -21,11 +23,18 @@ impl Material {
         };
         Material::Lambertian(lambertian)
     }
-    pub fn new_metal(albedo:Vec3) -> Material {
+    pub fn new_metal(albedo:Vec3,blur:f64) -> Material {
         let metal = Metal {
             albedo,
+            blur
         };
         Material::Metal(metal)
+    }
+    pub fn new_dielectric(refraction:f64) -> Material {
+        let dielectric:Dielectric = Dielectric {
+            refraction,
+        };
+        Material::Dielectric(dielectric)
     }
 }
 pub struct Lambertian {
@@ -44,15 +53,37 @@ impl Scatterable for Lambertian {
     }
 }
 pub struct Metal {
-    pub albedo:Vec3
+    pub albedo:Vec3,
+    pub blur:f64
 }
 impl Scatterable for Metal {
     fn scatter(&self,r:Ray,hit:HitData) -> Option<(Ray,Vec3)> {
-        let reflected = r.dir - (hit.normal * Vec3::dot(r.dir,hit.normal)) * 2.0;
+        let reflected = Vec3::reflect(r.dir,hit.normal);
         if Vec3::dot(reflected, hit.normal) > 0.0 {
-            let out = Ray::new(hit.point,reflected);
+            let out = Ray::new(hit.point,reflected + Vec3::rand_in_unit_sphere() * self.blur);
             return Some((out,self.albedo));
         }
         None
+    }
+}
+pub struct Dielectric {
+    pub refraction:f64,
+}
+impl Scatterable for Dielectric {
+    fn scatter(&self,r:Ray,hit:HitData) -> Option<(Ray,Vec3)> {
+        let refraction_ratio = if hit.hit_front {1.0/self.refraction} else {self.refraction};
+        let unit_dir = Vec3::unit_vector(r.dir);
+        let cos_theta = if Vec3::dot(-unit_dir,hit.normal) < 1.0 {
+            Vec3::dot(-unit_dir,hit.normal)
+        } else {
+            1.0
+        };
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let dir = if refraction_ratio * sin_theta > 1.0 {
+            Vec3::reflect(unit_dir,hit.normal)
+        } else {
+            Vec3::refract(unit_dir,hit.normal,refraction_ratio)
+        };
+        Some((Ray::new(hit.point,dir),Vec3::new(1.0,1.0,1.0)))
     }
 }

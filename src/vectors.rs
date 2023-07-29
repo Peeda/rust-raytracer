@@ -66,6 +66,19 @@ impl Vec3 {
             }
         }
     }
+    pub fn reflect(v:Vec3, n:Vec3) -> Vec3 {
+        v - n * Vec3::dot(v,n) * 2.0
+    }
+    pub fn refract(uv:Vec3, n:Vec3, refract_ratio:f64) -> Vec3{
+        let cos_theta = if Vec3::dot(-uv,n) < 1.0 {
+            Vec3::dot(-uv,n) 
+        } else {
+            1.0
+        };
+        let r_perp = (uv + n * cos_theta) * refract_ratio;
+        let r_parallel = -n * (1.0 - r_perp.magnitude_squared()).abs().sqrt();
+        r_perp + r_parallel
+    }
 }
 impl ops::Add<Vec3> for Vec3 {
     type Output = Vec3;

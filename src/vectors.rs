@@ -66,6 +66,19 @@ impl Vec3 {
             }
         }
     }
+    pub fn rand_in_unit_disc() -> Vec3 {
+        loop {
+            let mut rng = rand::thread_rng();
+            let vec = Vec3 {
+                x:rng.gen::<f64>(),
+                y:rng.gen::<f64>(),
+                z:0.0,
+            };
+            if vec.magnitude_squared() < 1.0 {
+                return vec;
+            }
+        }
+    }
     pub fn reflect(v:Vec3, n:Vec3) -> Vec3 {
         v - n * Vec3::dot(v,n) * 2.0
     }

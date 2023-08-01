@@ -1,6 +1,7 @@
 use crate::hit::HitData;
 use crate::rays::Ray;
 use crate::vectors::Vec3;
+use rand::Rng;
 pub trait Scatterable {
     fn scatter(&self,r:Ray,hit_data:HitData) -> Option<(Ray,Vec3)>;
 }
@@ -69,6 +70,13 @@ impl Scatterable for Metal {
 pub struct Dielectric {
     pub refraction:f64,
 }
+impl Dielectric {
+    fn reflectance(cos:f64, ref_idx:f64) -> f64 {
+        let mut r = (1.0-ref_idx) / (1.0+ref_idx);
+        r = r * r;
+        r + (1.0-r) * (1.0-cos).powf(5.0)
+    }
+}
 impl Scatterable for Dielectric {
     fn scatter(&self,r:Ray,hit:HitData) -> Option<(Ray,Vec3)> {
         let refraction_ratio = if hit.hit_front {1.0/self.refraction} else {self.refraction};
@@ -79,7 +87,10 @@ impl Scatterable for Dielectric {
             1.0
         };
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
-        let dir = if refraction_ratio * sin_theta > 1.0 {
+        let rng = rand::thread_rng;
+        let rand_float = rng().gen::<f64>();
+        let dir = if refraction_ratio * sin_theta > 1.0 || 
+            Dielectric::reflectance(cos_theta,refraction_ratio) > rand_float {
             Vec3::reflect(unit_dir,hit.normal)
         } else {
             Vec3::refract(unit_dir,hit.normal,refraction_ratio)
